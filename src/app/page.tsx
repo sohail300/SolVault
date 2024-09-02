@@ -1,113 +1,222 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Zap, ArrowRight, Gem, BarChart, Lock } from "lucide-react";
+import Link from "next/link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { BackgroundBeams } from "@/components/ui/background-beams";
+import { WobbleCard } from "@/components/ui/wobble-card";
+import { GlareCard } from "@/components/ui/glare-card";
+import getCurrentYear from "@/utils/getCurrentYear";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import {
+  WalletDisconnectButton,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
+
 import Image from "next/image";
 
-export default function Home() {
+export default function Component() {
+  const [balance, setBalance] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const wallet = useWallet();
+  const { connection } = useConnection();
+
+  const fetchBalance = async () => {
+    if (wallet.publicKey) {
+      setLoading(true);
+      try {
+        const balanceInLamports = await connection.getBalance(wallet.publicKey);
+        setBalance(balanceInLamports / LAMPORTS_PER_SOL);
+      } catch (error) {
+        console.error("Error fetching balance:", error);
+        setBalance(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (wallet.connected) {
+      fetchBalance();
+    }
+  }, [wallet.connected, wallet.publicKey, connection]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className="flex flex-col bg-gray-950 text-gray-100">
+      <section className="w-full py-8 md:py-20 lg:py-28 xl:py-36">
+        <div className="px-4 md:px-6 flex flex-col items-center justify-evenly space-y-8 text-center">
+          <Image
+            src={"/solana.webp"}
+            height={200}
+            width={200}
+            className="m-auto"
+          />
+          <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl ">
+            Welcome to solDapp
+          </h1>
+          <p className="mx-auto max-w-[700px] text-gray-400 md:text-xl space-y-8 ">
+            Experience the future of decentralized applications on Solana. Fast,
+            secure, and scalable.
+          </p>
+
+          {wallet.connected ? (
+            <>
+              <WalletDisconnectButton className="bg-red-500 hover:bg-red-600 text-white text-sm py-1 px-3 rounded transition duration-200" />
+            </>
+          ) : (
+            <WalletMultiButton className="bg-purple-600 hover:bg-purple-800 text-white text-sm py-1 px-3 rounded transition duration-200" />
+          )}
         </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
+      </section>
+      <section className="w-full py-12 md:py-24 lg:py-32">
+        <div className="px-4 md:px-6">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">
+            Our Offerings
           </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <WobbleCard
+              containerClassName="h-full bg-pink-800 min-h-[500px] lg:min-h-[300px]"
+              className=""
+            >
+              <CardHeader className="flex flex-row justify-between">
+                <CardTitle className="font-bold text-3xl">Balance</CardTitle>
+                <Gem className="h-12 w-12 mb-2" />
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li>View real-time SOL balance</li>
+                  <li>Monitor token balances</li>
+                  <li>Comprehensive balance tracking</li>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Link href="/balance" className=" w-full z-50">
+                  <Button className="w-full bg-purple-600 text-white hover:bg-purple-700 ">
+                    Check Balance
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </WobbleCard>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+            <WobbleCard
+              containerClassName="h-full bg-blue-900 min-h-[500px] lg:min-h-[300px]"
+              className=""
+            >
+              <CardHeader className="flex flex-row justify-between">
+                <CardTitle className="font-bold text-3xl">Airdrop</CardTitle>
+                <BarChart className="h-12 w-12 mb-2" />
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <li>Receive airdrops</li>
+                  <li>Receive sohailX token airdrops</li>
+                  <li>Automated airdrop processes</li>
+                </ul>
+              </CardContent>
+              <CardFooter className=" space-x-4">
+                <Link href="/airdrop/sol" className=" w-full z-50">
+                  <Button className="w-full bg-purple-600 text-white hover:bg-purple-700">
+                    SOL
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/airdrop/sohailx" className=" w-full z-50">
+                  <Button className="w-full bg-purple-600 text-white hover:bg-purple-700">
+                    sohailX
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </WobbleCard>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
+            <WobbleCard
+              containerClassName="h-full bg-green-700 min-h-[500px] lg:min-h-[300px]"
+              className=""
+            >
+              <CardHeader className="flex flex-row justify-between">
+                <CardTitle className="font-bold text-3xl">Transfer</CardTitle>
+                <Lock className="h-12 w-12 mb-2" />
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm">
+                  <ul className="space-y-2 text-sm">
+                    <li>Secure SOL transfers</li>
+                    <li>Transfer tokens seamlessly</li>
+                    <li>Instant transaction processing</li>
+                  </ul>
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Link href="/transfer" className=" w-full z-50">
+                  <Button className="w-full bg-purple-600 text-white hover:bg-purple-700">
+                    Transfer Now
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </WobbleCard>
+          </div>
+        </div>
+      </section>
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-gray-900">
+        <div className="px-4 md:px-6">
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-center mb-8">
+            Features
           </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+          <div className=" flex justify-evenly">
+            <GlareCard className="flex flex-col items-center justify-center p-6 bg-sky-900 text-white shadow-lg hover:shadow-2xl transition-shadow duration-300">
+              <Zap className="h-12 w-12 mb-4" />
+              <h3 className="text-lg font-bold mb-2">Lightning Fast</h3>
+              <p className="text-gray-300 text-center">
+                Experience blazing fast transaction speeds with Solana's
+                architecture.
+              </p>
+            </GlareCard>
+
+            <GlareCard className="flex flex-col items-center justify-center p-6  bg-sky-900 text-white shadow-lg hover:shadow-2xl transition-shadow duration-300">
+              <Zap className="h-12 w-12 mb-4" />
+              <h3 className="text-lg font-bold mb-2">Secure & Reliable</h3>
+              <p className="text-gray-300 text-center">
+                Built on Solana's robust blockchain for maximum security and
+                uptime.
+              </p>
+            </GlareCard>
+          </div>
+        </div>
+      </section>
+      <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-gray-800">
+        <p className="text-xs text-gray-400">
+          © {getCurrentYear()} SolDApp. All rights reserved.
+        </p>
+        <nav className="sm:ml-auto flex gap-4 sm:gap-6">
+          <Link
+            className="text-xs hover:underline underline-offset-4 text-gray-400"
+            href="#"
+          >
+            Terms of Service
+          </Link>
+          <Link
+            className="text-xs hover:underline underline-offset-4 text-gray-400"
+            href="#"
+          >
+            Privacy
+          </Link>
+        </nav>
+      </footer>
+      <BackgroundBeams />
+    </div>
   );
 }
